@@ -4,8 +4,25 @@ from mpl_toolkits.mplot3d import Axes3D
 from numpy.linalg import *
 import sys
 sys.path.append('../../Aero_Funcs')
-from Aero_Funcs import *
-from Controls_Funcs import *
+#from Aero_Funcs import *
+#from Controls_Funcs import *
+
+def quat2dcm(n, E):
+    """
+    generates the active rotation matrix from a quaternion.
+    :param n: scalar part
+    :param E: vector part
+
+    """
+    
+    frame_rotation = (2*n**2 - 1)*identity(3) + 2*outer(E,E) - 2*n*crux(E) 
+
+    return frame_rotation
+
+def crux(A):
+	return array([[0, -A[2], A[1]],
+	              [A[2], 0, -A[0]],
+	              [-A[1], A[0], 0]])
 
 newstate = loadtxt('newstate.txt')
 t = loadtxt('t.txt')
@@ -28,7 +45,7 @@ E = vstack([E1, E2, E3]).T
 
 torque_angle = []
 for E, n, torque in zip(E, n, tc_control):
-    axis = quat2dcm(E,n)@array([0,0,1])
+    axis = quat2dcm(n,E)@array([0,0,1])
     torque_angle.append(arccos(dot(axis, torque)/norm(torque)))
 
 
